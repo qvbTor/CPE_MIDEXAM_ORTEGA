@@ -22,7 +22,7 @@
   roles:
     - Ubuntu
 
-- hosts: CentOS
-  become: true
-  roles:
-    - CentOS
+#- hosts: CentOS
+#  become: true
+#  roles:
+#    - CentOS
