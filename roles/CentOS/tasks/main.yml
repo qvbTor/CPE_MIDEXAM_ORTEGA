@@ -1,0 +1,162 @@
+---
+#  - name: Install prerequisites
+#    dnf:
+#      name:
+#        - java-1.8.0-openjdk
+#        - epel-release
+#        - wget
+#        - which
+#      state: latest
+#      use_backend: dnf4
+
+#  - name: Add Elasticsearch RPM repository
+#    shell: rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+#  - name: Add Elasticsearch YUM repository
+#    copy:
+#      content: |
+#        [elasticsearch-7.x]
+#        name=Elasticsearch repository for 7.x packages
+#        baseurl=https://artifacts.elastic.co/packages/7.x/yum
+#        gpgcheck=1
+#        gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+#        enabled=1
+#        autorefresh=1
+#        type=rpm-md
+#      dest: /etc/yum.repos.d/elasticsearch.repo
+#    become: yes
+
+#  - name: Install Elasticsearch
+#    dnf:
+#     name: elasticsearch
+#      use_backend: dnf4
+#      state: latest
+
+#  - name: Install Kibana
+#    dnf:
+#      name: kibana
+#      use_backend: dnf4
+#      state: latest
+
+#  - name: Install Logstash for CentOS
+#    dnf:
+#      name: logstash
+#      use_backend: dnf4
+#      state: latest
+
+#PHP + HTTPD + MARIADB INSTALLATION
+#  - name: install php and httpd for CentOS
+#    dnf:
+#      name:
+#        - php
+#        - httpd
+#      state: latest
+#      use_backend: dnf4
+#      update_cache: yes
+
+#  - name: install mariadb for CentOS
+#    dnf:
+#      name: mariadb-server
+#      state: latest
+#      use_backend: dnf4
+
+#  - name: "Mariadb- Restarting/Enabling"
+#    service:
+#      name: mariadb
+#      state: restarted
+#      enabled: true
+
+#PROMETHEUS INSTALLATION
+#  - name: Prometheus PATH directory
+#    file:
+#      path: ~/prometheus
+#      state: directory
+
+#  - name: Creating directory for Prometheus files
+#    file:
+#      path:
+#        - /etc/prometheus
+#        - /var/lib/prometheus
+#      mode: 0777
+#      state: directory
+
+#  - name: Prometheus config file duplicate
+#    copy:
+#      src: prometheus.service
+#      dest: /etc/systemd/system
+#      mode: 7777
+#      owner: root
+#      group: root
+
+#  - name: Install Prometheus for CentOS
+#    unarchive:
+#      src: https://github.com/prometheus/prometheus/releases/download/v2.8.1/prometheus-2.8.1.linux-amd64.tar.gz
+#      dest: ~/prometheus
+#      remote_src: yes
+#      mode: 0777
+#      owner: root
+#      group: root
+
+#  - name: Configuring Prometheus
+#    shell: |
+#      cd ~/prometheus/prometheus*
+#      cp -r . /usr/local/bin/prometheus
+
+#GRAFANA INSTALLATION
+#  - name: Check SELinux status
+#    command: getenforce
+#    register: selinux_status
+
+#  - name: Disable SELinux if enabled
+#    when: selinux_status.stdout == "Enforcing"
+#    command: setenforce 0
+
+#  - name: Modify SELinux configurations
+#    lineinfile:
+#      path: /etc/sysconfig/selinux
+#      regexp: '^SELINUX='
+#      line: 'SELINUX=disabled'
+#    when: selinux_status.stdout == "Enforcing"
+
+#  - name: Reboot system if SELinux was disabled
+#    command: reboot
+#    async: 0
+#    poll: 0
+#    when: selinux_status.stdout == "Enforcing"
+
+#  - name: Create Grafana YUM repository file
+#    template:
+#      src: grafana.repo.j2
+#      dest: /etc/yum.repos.d/grafana.repo
+
+#  - name: Install Grafana
+#    dnf:
+#      name: grafana
+#      state: present
+#      use_backend: dnf4
+
+#  - name: Start and enable Grafana service
+#    systemd:
+#      name: grafana-server
+#      state: started
+#      enabled: yes
+#INFLUXDB INSTALLATION
+- name: Copying the Influxdb repository file
+  unarchive:
+    src: https://dl.influxdata.com/influxdb/releases/influxdb2-2.4.0-linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+    mode: 0777
+    owner: root
+    group: root
+
+- name: Adding the executables to the PATH
+  shell:
+    cd /tmp/influxdb2*
+    sudo cp influxdb2-2.4.0-linux-amd64/influxd /usr/local/bin/
+
+- name: Install InfluxDB
+  dnf:
+    name: influxdb
+    state: present
+    use_backend: dnf4
