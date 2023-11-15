@@ -102,61 +102,61 @@
       cd ~/prometheus/prometheus*
       cp -r . /usr/local/bin/prometheus
 
-#GRAFANA INSTALLATION
-#  - name: Check SELinux status
-#    command: getenforce
-#    register: selinux_status
 
-#  - name: Disable SELinux if enabled
-#    when: selinux_status.stdout == "Enforcing"
-#    command: setenforce 0
+  - name: Check SELinux status
+    command: getenforce
+    register: selinux_status
 
-#  - name: Modify SELinux configurations
-#    lineinfile:
-#      path: /etc/sysconfig/selinux
-#      regexp: '^SELINUX='
-#      line: 'SELINUX=disabled'
-#    when: selinux_status.stdout == "Enforcing"
+  - name: Disable SELinux if enabled
+    when: selinux_status.stdout == "Enforcing"
+    command: setenforce 0
 
-#  - name: Reboot system if SELinux was disabled
-#    command: reboot
-#    async: 0
-#    poll: 0
-#    when: selinux_status.stdout == "Enforcing"
+  - name: Modify SELinux configurations
+    lineinfile:
+      path: /etc/sysconfig/selinux
+      regexp: '^SELINUX='
+      line: 'SELINUX=disabled'
+    when: selinux_status.stdout == "Enforcing"
 
-#  - name: Create Grafana YUM repository file
-#    template:
-#      src: grafana.repo.j2
-#      dest: /etc/yum.repos.d/grafana.repo
+  - name: Reboot system if SELinux was disabled
+    command: reboot
+    async: 0
+    poll: 0
+    when: selinux_status.stdout == "Enforcing"
 
-#  - name: Install Grafana
-#    dnf:
-#      name: grafana
-#      state: present
-#      use_backend: dnf4
+  - name: Create Grafana YUM repository file
+    template:
+      src: grafana.repo.j2
+      dest: /etc/yum.repos.d/grafana.repo
 
-#  - name: Start and enable Grafana service
-#    systemd:
-#      name: grafana-server
-#      state: started
-#      enabled: yes
-#INFLUXDB INSTALLATION
-#- name: Copying the Influxdb repository file
-#  unarchive:
-#    src: https://dl.influxdata.com/influxdb/releases/influxdb2-2.4.0-linux-amd64.tar.gz
-#    dest: /tmp/
-#    remote_src: yes
-#    mode: 0777
-#    owner: root
-#    group: root
+  - name: Install Grafana
+    dnf:
+      name: grafana
+      state: present
+      use_backend: dnf4
 
-#- name: Adding the executables to the PATH
-#  shell:
-#    cd /tmp/influxdb2*
-#    sudo cp influxdb2-2.4.0-linux-amd64/influxd /usr/local/bin/
+  - name: Start and enable Grafana service
+    systemd:
+      name: grafana-server
+      state: started
+      enabled: yes
 
-#- name: Install InfluxDB
-#  dnf:
-#   name: influxdb
-#    state: present
-#    use_backend: dnf4
+- name: Copying the Influxdb repository file
+  unarchive:
+    src: https://dl.influxdata.com/influxdb/releases/influxdb2-2.4.0-linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+    mode: 0777
+    owner: root
+    group: root
+
+- name: Adding the executables to the PATH
+  shell:
+    cd /tmp/influxdb2*
+    sudo cp influxdb2-2.4.0-linux-amd64/influxd /usr/local/bin/
+
+- name: Install InfluxDB
+  dnf:
+   name: influxdb
+    state: present
+    use_backend: dnf4
